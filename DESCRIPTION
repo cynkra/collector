@@ -12,3 +12,5 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
 Imports: 
     constructive
+URL: https://github.com/cynkra/collector
+BugReports: https://github.com/cynkra/collector/issues
