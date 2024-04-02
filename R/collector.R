@@ -9,12 +9,8 @@ collector <- function(fun, name = deparse1(substitute(fun)), force = FALSE) {
     # force args (removed later if irrelevant)
     quote(eapply(environment(), force)),
     # capture call and argument on entrance
-    bquote(
-      globals[[.(name)]] <- list(
-        call = constructive::deparse_call(sys.call()),
-        args = constructive::construct_reprex()
-        )
-    ),
+    bquote(globals[[.(name)]]$args <- constructive::construct_reprex()),
+    bquote(globals[[.(name)]]$call <- constructive::deparse_call(sys.call())),
     # capture value on exit
     bquote(
       on.exit(
