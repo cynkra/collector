@@ -1,0 +1,76 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# collector
+
+draft for discussion
+
+## Installation
+
+Install with
+
+```
+pak::pak("cynkra/collector")
+```
+
+
+## Examples
+
+`collector()` creates a new function, with an altered body but the same environment:
+
+```{r}
+library(collector)
+add <- function(x, y) {
+  x + y
+}
+environment(add) <- asNamespace("stats")
+add2 <- collector(add)
+add2
+```
+
+It behaves the same as the original but additionally it collects :
+
+* The arguments
+* The call
+* The return value
+
+```{r}
+a <- 1
+b <- 2
+add2(a, b)
+
+collected("add")
+```
+
+Note the use of `delayedAssign()` because arguments are not evaluated yet
+at the start of the body, this is robust to functions that use NSE.
+
+If we know we don't use NSE, we can use `force = TRUE`
+
+```{r}
+# if we 
+add3 <- collector(add, force = TRUE, name = "custom_name")
+add3(a, b)
+collected("custom_name")
+```
+
+Or we can choose
+
+```{r}
+# if we 
+add4 <- collector(add, force = "x", name = "custom_name2")
+add4(a, b)
+collected("custom_name2")
+```
