@@ -49,9 +49,8 @@ It behaves the same as the original but additionally it collects :
 ```{r}
 a <- 1
 b <- 2
-add2(a, b)
-
-collected("add")
+f <- function() add2(a, b)
+f()
 ```
 
 Note the use of `delayedAssign()` because arguments are not evaluated yet
@@ -61,16 +60,30 @@ If we know we don't use NSE, we can use `force = TRUE`
 
 ```{r}
 # if we 
-add3 <- collector(add, force = TRUE, name = "custom_name")
+add3 <- collector(add, force = TRUE)
 add3(a, b)
-collected("custom_name")
 ```
 
 Or we can choose
 
 ```{r}
 # if we 
-add4 <- collector(add, force = "x", name = "custom_name2")
+add4 <- collector(add, force = "x")
 add4(a, b)
-collected("custom_name2")
 ```
+
+Results are collected in a list internally, which we can collect with the `journal()`
+function :
+
+```{r}
+j <- journal()
+j
+
+as.list(j[1,])
+
+as.list(j[2,])
+
+as.list(j[3,])
+```
+
+
