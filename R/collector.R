@@ -20,9 +20,12 @@ globals$i <- 0
 set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
   globals$path <- path
   dir.create(path, showWarnings = FALSE)
+  caller <- parent.frame()
+  on_load <-
+    exists(".onLoad", caller) &&
+    identical(sys.function(-1), get(".onLoad", caller))
   if (is.null(pkg)) {
     # default pkg from .onLoad() or DESCRIPTION
-    on_load <- identical(sys.function(-1), get(".onLoad", parent.frame()))
     if (on_load) {
       on_load_call <- sys.call(-1)
       pkg <- eval.parent(on_load_call[[3]], 2)

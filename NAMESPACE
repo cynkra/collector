@@ -2,3 +2,4 @@
 
 export(collect_and_run)
 export(set_collector)
+import(rlang)
