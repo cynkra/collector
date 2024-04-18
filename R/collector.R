@@ -127,6 +127,9 @@ env_clone_lazy <- function(env) {
   # don't touch dots or bindings that are already lazy
   nms <- names(clone)
   nms <- setdiff(nms[!rlang::env_binding_are_lazy(clone, nms)], "...")
+  # this shouldn't be needed, but works around a probable bug in rlang
+  # https://github.com/cynkra/collector/issues/2
+  rm(list = nms, envir = clone)
   for (nm in nms) {
     env_bind_lazy(clone, !!nm := !!env[[nm]])
   }
