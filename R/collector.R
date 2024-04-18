@@ -112,22 +112,21 @@ collect_and_run <- function() {
         env = new_caller_env
       )))
   })
-
   eval(call_to_original, new_caller_env)
 }
 
 # note: env_clone doesn't do deep copy, i.e we're not cloning environments that
 #   are bound in `e`, or nested in lists, or found in attributes, or as function enclosures.
-# We don't take care about active bindings, they'll be serialized with whatever
+# We don't take care of active bindings, they'll be serialized with whatever
 #   value they have at evaluation time
 env_clone_lazy <- function(env) {
   # we stop the recursion when we find a special env, defined by having a name
   if (!is.null(attr(env, "name")) || identical(env, emptyenv())) return(env)
   parent_clone <- env_clone_lazy(env_parent(env))
   clone <- rlang::env_clone(env, parent = parent_clone)
-  # don't touch bindings that are already lazy
+  # don't touch dots or bindings that are already lazy
   nms <- names(clone)
-  nms <- nms[!rlang::env_binding_are_lazy(clone, nms)]
+  nms <- setdiff(nms[!rlang::env_binding_are_lazy(clone, nms)], "...")
   for (nm in nms) {
     env_bind_lazy(clone, !!nm := !!env[[nm]])
   }
