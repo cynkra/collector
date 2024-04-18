@@ -19,7 +19,7 @@ globals$i <- 0
 #' @export
 set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
   globals$path <- path
-  dir.create(path, showWarnings = FALSE)
+  dir.create(path, showWarnings = FALSE, recursive = TRUE)
   caller <- parent.frame()
   on_load <-
     exists(".onLoad", caller) &&
