@@ -57,7 +57,7 @@ set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
       original <- list(ns[[nm]])
       names(original) <- nm
       attr(val, "unmodified") <- original
-      assignInNamespace(nm, val, ns)
+      utils::assignInNamespace(nm, val, ns)
     }
   }
 
