@@ -109,7 +109,8 @@ collect_and_run <- function() {
       file = sprintf("%s/%s-%s.qs", globals$path, globals$i, names(original)),
       list(
         call = call,
-        env = new_caller_env
+        env = new_caller_env,
+        value = returnValue()
       )))
   })
   eval(call_to_original, new_caller_env)
