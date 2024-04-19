@@ -1,3 +1,4 @@
 ^collector\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
+^\.aviator/config\.yml$
