@@ -106,7 +106,7 @@ collect_and_run <- function() {
     globals$i <- globals$i + 1
     env_cleanup(new_caller_env)
     suppressWarnings(qs::qsave(
-      file = sprintf("%s/%s-%s.qs", globals$path, globals$i, names(original)),
+      file = sprintf("%s/%.5d-%s.qs", globals$path, globals$i, names(original)),
       list(
         call = call,
         env = new_caller_env,
