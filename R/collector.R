@@ -57,6 +57,12 @@ set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
         rlang::abort(c(msg, x = info1, i = info2))
       }
       funs <- mget(funs, ns)
+      wrong_nms <- names(Filter(Negate(is.function), funs))
+      if (length(wrong_nms)) {
+        msg <- "All provided objects must be functionms"
+        info1 <- paste("Found non function object(s):", toString(paste0("'", wrong_nms, "'")))
+        rlang::abort(c(msg, x = info1))
+      }
     }
 
     # Replace bodies a call to collect_and_run(), keep original call as attr
