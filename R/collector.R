@@ -122,7 +122,8 @@ collect_and_run <- function() {
 #   value they have at evaluation time
 env_clone_lazy <- function(env) {
   # we stop the recursion when we find a special env, defined by having a name
-  if (!is.null(attr(env, "name")) || identical(env, emptyenv())) return(env)
+
+  if (!env_name(env) %in% c("", "global")) return(env)
   parent_clone <- env_clone_lazy(env_parent(env))
   clone <- rlang::env_clone(env, parent = parent_clone)
   # don't touch dots or bindings that are already lazy
@@ -139,7 +140,7 @@ env_clone_lazy <- function(env) {
 
 # drop lazy bindings, since these were not used
 env_cleanup <- function(env) {
-  if (!is.null(attr(env, "name")) || identical(env, emptyenv())) return(env)
+  if (!env_name(env) %in% c("", "global")) return(env)
   env_cleanup(env_parent(env))
   lazy_lgl <- env_binding_are_lazy(env)
   rm(list = names(lazy_lgl)[lazy_lgl], envir = env)
