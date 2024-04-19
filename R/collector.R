@@ -46,6 +46,16 @@ set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
       # default to all exported functions of the ns
       funs <- Filter(is.function, mget(intersect(getNamespaceExports(ns), names(ns)), ns))
     } else {
+      wrong_nms <- Filter(function(x) !exists(x, ns, inherits = FALSE), funs)
+      if (length(wrong_nms)) {
+        msg <- "All provided functions must exist in the namespace"
+        info1 <- paste("Found:", toString(paste0("'", wrong_nms, "'")))
+        info2 <- paste(
+          "Did you erroneously attempt to patch a re-exported function,",
+          "or a generic that is not in the package?"
+        )
+        rlang::abort(c(msg, x = info1, i = info2))
+      }
       funs <- mget(funs, ns)
     }
 
