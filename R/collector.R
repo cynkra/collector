@@ -127,12 +127,14 @@ collect_and_run <- function() {
   original <- attr(sys.function(-1), "unmodified")
   call_to_original <- call
   call_to_original[[1]] <-  original[[1]]
-  if (is_called_by_own_ns) {
+  if (is_called_by_own_ns || isTRUE(globals$collecting)) {
     return(eval(call_to_original, caller_env))
   }
 
   new_caller_env <- env_clone_lazy(caller_env)
+  globals$collecting <- TRUE
   on.exit({
+    globals$collecting <- NULL
     env_cleanup(new_caller_env)
     attributes(call) <- NULL
     calls <- lapply(calls, `attributes<-`, NULL)
