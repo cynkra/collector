@@ -73,8 +73,16 @@ set_collector <- function(
     # Replace bodies a call to collect_and_run(), keep original call as attr
     for (nm in names(funs)) {
       val <- ns[[nm]]
+      if (length(formals(val)) > 0 && names(formals(val))[[1]] != "...") {
+        body(val) <- expr({
+          # Force first argument to avoid recursion with pipes
+          force(!!sym(names(formals(val))[[1]]))
+          collector::collect_and_run()
+        })
+      } else {
+        body(val) <- quote(collector::collect_and_run())
+      }
       # note: trace() calls it "original" so we picked a new name
-      body(val) <- quote(collector::collect_and_run())
       original <- list(ns[[nm]])
       names(original) <- nm
       attr(val, "unmodified") <- original
