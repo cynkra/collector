@@ -109,10 +109,11 @@ collect_and_run <- function() {
   exec_env <- parent.frame()
   caller_env <- parent.frame(2)
   is_called_by_own_ns <- identical(topenv(caller_env), topenv(exec_env))
-  call = sys.call(-1)
+  call <- sys.call(-1)
+  attributes(call) <- NULL
   original <- attr(sys.function(-1), "unmodified")
   call_to_original <- call
-  call_to_original[[1]] <-  original[[1]]
+  call_to_original[[1]] <- original[[1]]
   if (is_called_by_own_ns) {
     return(eval(call_to_original, caller_env))
   }
@@ -121,7 +122,6 @@ collect_and_run <- function() {
   on.exit({
     globals$i <- globals$i + 1
     env_cleanup(new_caller_env)
-    attributes(call) <- NULL
     suppressWarnings(qs::qsave(
       file = sprintf("%s/%.5d-%s.qs", globals$path, globals$i, names(original)),
       list(
