@@ -121,6 +121,7 @@ collect_and_run <- function() {
   on.exit({
     globals$i <- globals$i + 1
     env_cleanup(new_caller_env)
+    attributes(call) <- NULL
     suppressWarnings(qs::qsave(
       file = sprintf("%s/%.5d-%s.qs", globals$path, globals$i, names(original)),
       list(
