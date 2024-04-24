@@ -1,6 +1,5 @@
 # initiate global tibble to store the results
 globals <- new.env()
-globals$path <- NULL
 globals$i <- 0
 
 #' Set functions to use collector
@@ -17,8 +16,14 @@ globals$i <- 0
 #' contains a list with 2 elements named `call` and `env`.
 #'
 #' @export
-set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
+set_collector <- function(
+    funs = NULL,
+    pkg = NULL,
+    path = "collector",
+    collector_fun = NULL) {
   globals$path <- path
+  globals$collector_fun <- collector_fun %||% default_collector_fun
+
   dir.create(path, showWarnings = FALSE, recursive = TRUE)
   caller <- parent.frame()
   on_load <-
@@ -68,8 +73,16 @@ set_collector <- function(funs = NULL, pkg = NULL, path = "collector") {
     # Replace bodies a call to collect_and_run(), keep original call as attr
     for (nm in names(funs)) {
       val <- ns[[nm]]
+      if (length(formals(val)) > 0 && names(formals(val))[[1]] != "...") {
+        body(val) <- expr({
+          # Force first argument to avoid recursion with pipes
+          force(!!sym(names(formals(val))[[1]]))
+          collector::collect_and_run()
+        })
+      } else {
+        body(val) <- quote(collector::collect_and_run())
+      }
       # note: trace() calls it "original" so we picked a new name
-      body(val) <- quote(collector::collect_and_run())
       original <- list(ns[[nm]])
       names(original) <- nm
       attr(val, "unmodified") <- original
@@ -109,27 +122,39 @@ collect_and_run <- function() {
   exec_env <- parent.frame()
   caller_env <- parent.frame(2)
   is_called_by_own_ns <- identical(topenv(caller_env), topenv(exec_env))
-  call = sys.call(-1)
+  call <- sys.call(-1)
+  calls <- sys.calls()
   original <- attr(sys.function(-1), "unmodified")
   call_to_original <- call
   call_to_original[[1]] <-  original[[1]]
-  if (is_called_by_own_ns) {
+  if (is_called_by_own_ns || isTRUE(globals$collecting)) {
     return(eval(call_to_original, caller_env))
   }
 
   new_caller_env <- env_clone_lazy(caller_env)
+  globals$collecting <- TRUE
   on.exit({
-    globals$i <- globals$i + 1
+    globals$collecting <- NULL
     env_cleanup(new_caller_env)
-    suppressWarnings(qs::qsave(
-      file = sprintf("%s/%.5d-%s.qs", globals$path, globals$i, names(original)),
-      list(
-        call = call,
-        env = new_caller_env,
-        value = returnValue()
-      )))
+    attributes(call) <- NULL
+    calls <- lapply(calls, `attributes<-`, NULL)
+    globals$collector_fun(
+      call = call,
+      env = new_caller_env,
+      calls = calls,
+      value = returnValue()
+    )
   })
   eval(call_to_original, new_caller_env)
+}
+
+#' @export
+default_collector_fun <- function(call, calls, env, value) {
+  globals$i <- globals$i + 1
+  suppressWarnings(qs::qsave(
+    file = sprintf("%s/%.5d.qs", globals$path, globals$i),
+    list(call = call, env = env, calls = calls, value = value)
+  ))
 }
 
 # note: env_clone doesn't do deep copy, i.e we're not cloning environments that

@@ -4,7 +4,12 @@
 \alias{set_collector}
 \title{Set functions to use collector}
 \usage{
-set_collector(funs = NULL, pkg = NULL, path = "collector")
+set_collector(
+  funs = NULL,
+  pkg = NULL,
+  path = "collector",
+  collector_fun = NULL
+)
 }
 \arguments{
 \item{funs}{Names of functions, all exported functions are considered by default}
