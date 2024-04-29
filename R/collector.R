@@ -150,7 +150,7 @@ env_clone_lazy <- function(env) {
   # https://github.com/cynkra/collector/issues/2
   rm(list = nms, envir = clone)
   for (nm in nms) {
-    env_bind_lazy(clone, !!nm := !!env[[nm]])
+    env_bind_lazy(clone, !!nm := env[[!!nm]])
   }
   clone
 }
